@@ -1,0 +1,611 @@
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=Noto+Sans+Bengali:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  #root, #root *{ box-sizing:border-box; }
+  #root{
+    --ink:#1C1B19; --paper:#EDEAE1; --card:#F7F5EF;
+    --red:#B23A2E; --blue:#1B4F72; --yellow:#A9740C;
+    --red-tint:#F3DEDA; --blue-tint:#DCE7EE; --yellow-tint:#F5E6C4;
+    font-family:'Noto Sans Bengali','Space Grotesk',sans-serif;
+    color:var(--ink); background:var(--paper); border-radius:16px;
+    padding:24px 18px 28px; line-height:1.6; font-size:14px;
+    width:100%; max-width:680px; margin:0 auto; overflow-x:hidden;
+  }
+  #root .de{font-family:'Space Grotesk',sans-serif;}
+  #root h1{font-size:19px; font-weight:700; margin:0 0 4px;}
+  #root .sub{font-size:12.5px; color:#5c5a54; margin:0 0 18px;}
+  #root .track{position:relative; margin:0 0 22px; height:6px; background:#DAD6C9; border-radius:4px; overflow:hidden;}
+  #root .track-fill{position:absolute; left:0; top:0; height:100%; background:var(--red); border-radius:4px; transition:width .3s;}
+  #root .stats{display:flex; justify-content:space-between; align-items:baseline; margin-bottom:20px;}
+  #root .stat-num{font-size:24px; font-weight:700; font-family:'Space Grotesk',sans-serif;}
+  #root .stat-label{font-size:11.5px; color:#5c5a54;}
+  #root .week{margin-bottom:12px; border:1px solid #D8D4C6; border-radius:12px; background:var(--card); overflow:hidden;}
+  #root .week-head{display:flex; align-items:center; gap:10px; padding:12px 14px; cursor:pointer; user-select:none;}
+  #root .badge{width:26px; height:26px; flex-shrink:0; display:flex; align-items:center; justify-content:center;}
+  #root .week-title{font-size:14px; font-weight:700; margin:0;}
+  #root .week-sub{font-size:11.5px; color:#5c5a54; margin:0;}
+  #root .week-progress{margin-left:auto; font-size:11.5px; font-weight:500; color:#5c5a54; white-space:nowrap;}
+  #root .chevron{transition:transform .2s; flex-shrink:0; color:#8a877e;}
+  #root .week.open .chevron{transform:rotate(180deg);}
+  #root .days{max-height:0; overflow:hidden; transition:max-height .3s ease;}
+  #root .week.open .days{max-height:30000px;}
+  #root .day{border-top:1px solid #E5E1D3;}
+  #root .day-head{display:flex; gap:10px; align-items:flex-start; padding:9px 14px 9px 14px; cursor:pointer;}
+  #root .day-head input{margin-top:4px; width:15px; height:15px; flex-shrink:0; accent-color:var(--red); cursor:pointer;}
+  #root .day-label{font-size:13px; flex:1;}
+  #root .day-label b{font-weight:500;}
+  #root .day.done .day-title{color:#8a877e; text-decoration:line-through;}
+  #root .day-chevron{color:#b0ada2; flex-shrink:0; margin-top:3px; transition:transform .2s;}
+  #root .day.expanded .day-chevron{transform:rotate(180deg);}
+  #root .tag{display:inline-block; font-size:10px; font-weight:700; padding:1px 7px; border-radius:20px; margin-right:7px; vertical-align:1px;}
+  #root .tag.vocab{background:var(--yellow-tint); color:var(--yellow);}
+  #root .tag.grammar{background:var(--blue-tint); color:var(--blue);}
+  #root .tag.practice{background:var(--red-tint); color:var(--red);}
+  #root .lesson{max-height:0; overflow:hidden; transition:max-height .3s ease; padding:0 14px 0 38px;}
+  #root .day.expanded .lesson{max-height:5000px; padding-bottom:16px;}
+  #root .goal{font-size:12.5px; color:#5c5a54; margin:0 0 12px; font-style:italic;}
+  #root .block-title{font-size:11.5px; font-weight:700; text-transform:uppercase; letter-spacing:.03em; margin:14px 0 6px;}
+  #root .block-title.vocab-t{color:var(--yellow);}
+  #root .block-title.grammar-t{color:var(--blue);}
+  #root .block-title.practice-t{color:var(--red);}
+  #root table.vocab-tbl{width:100%; border-collapse:collapse; font-size:12.5px; table-layout:fixed;}
+  #root table.vocab-tbl td{padding:4px 6px; border-bottom:1px solid #E5E1D3; vertical-align:top; word-break:break-word;}
+  #root table.vocab-tbl td.w{font-family:'Space Grotesk',sans-serif; font-weight:700; width:32%;}
+  #root table.vocab-tbl td.p{color:#8a877e; width:24%;}
+  #root .gnote{font-size:12.5px; margin:0 0 8px;}
+  #root .ex{background:#fff; border:1px solid #E5E1D3; border-radius:8px; padding:8px 10px; margin:6px 0; font-size:12.5px;}
+  #root .ex .de{color:var(--blue); font-weight:700; display:block;}
+  #root .ex .bn{color:#5c5a54; display:block; margin-top:2px;}
+  #root .task{font-size:12.5px; margin:0 0 8px;}
+  #root .ans-btn{font-size:11.5px; background:none; border:1px solid #D8D4C6; border-radius:6px; padding:4px 10px; cursor:pointer; color:var(--red);}
+  #root .ans{display:none; font-size:12.5px; background:var(--red-tint); border-radius:8px; padding:8px 10px; margin-top:6px; color:#7a2c22;}
+  #root .ans.show{display:block;}
+  #root .foot{margin-top:16px; font-size:11.5px; color:#5c5a54; text-align:center;}
+  #root .reset{display:block; margin:12px auto 0; font-size:11px; color:#8a877e; background:none; border:none; text-decoration:underline; cursor:pointer;}
+  #root .credit{margin:16px auto 0; font-size:10.5px; color:#a9a69c; text-align:center;}
+
+  @media (max-width:460px){
+    #root{ padding:18px 12px 22px; font-size:13px; border-radius:12px; }
+    #root h1{ font-size:16px; }
+    #root .sub{ font-size:11.5px; }
+    #root .stat-num{ font-size:20px; }
+    #root .week-head{ padding:10px 10px; gap:8px; }
+    #root .badge svg{ width:22px; height:22px; }
+    #root .week-title{ font-size:13px; }
+    #root .week-sub{ font-size:10.5px; }
+    #root .week-progress{ font-size:10.5px; }
+    #root .day-head{ padding:8px 10px; gap:8px; }
+    #root .day-label{ font-size:12px; }
+    #root .lesson{ padding:0 8px 0 26px; }
+    #root .day.expanded .lesson{ padding-bottom:12px; }
+    #root table.vocab-tbl{ font-size:11.5px; }
+    #root table.vocab-tbl td{ padding:4px 3px; }
+    #root .ex{ font-size:11.5px; padding:7px 8px; }
+    #root .task, #root .gnote{ font-size:11.5px; }
+    #root .ans-btn{ width:100%; padding:7px 10px; }
+  }
+  @media (max-width:340px){
+    #root table.vocab-tbl td.w{ width:38%; }
+    #root table.vocab-tbl td.p{ display:none; }
+  }
+</style>
+<div id="root">
+  <h1>German A1 <span class="de">Roadmap</span> — সম্পূর্ণ নতুনদের জন্য</h1>
+  <p class="sub">৪ সপ্তাহ · ২৮ দিন · প্রতিদিন ১-২ ঘণ্টা · প্রতিটা দিনে পুরো লেসন এখানেই</p>
+
+  <div class="stats">
+    <div>
+      <div class="stat-num" id="stat-num">0/28</div>
+      <div class="stat-label">দিন সম্পন্ন</div>
+    </div>
+    <div style="text-align:right">
+      <div class="stat-num" id="stat-pct">0%</div>
+      <div class="stat-label">অগ্রগতি</div>
+    </div>
+  </div>
+  <div class="track"><div class="track-fill" id="track-fill" style="width:0%"></div></div>
+
+  <div id="weeks"></div>
+
+  <p class="foot">টিপ: নতুন দিনে ঢোকার আগে আগের দিনের vocab আরেকবার দেখে নিন — ৩ মিনিটেই হয়ে যায়, কিন্তু মনে রাখতে অনেক সাহায্য করে।</p>
+  <button class="reset" id="reset-btn">progress রিসেট করুন</button>
+  <p class="credit">Developed by Anamul Hasan Alif</p>
+</div>
+<script>
+(function(){
+  var shapes = [
+    '<svg viewBox="0 0 26 26" width="26" height="26"><circle cx="13" cy="13" r="10" fill="#B23A2E"/></svg>',
+    '<svg viewBox="0 0 26 26" width="26" height="26"><rect x="3" y="3" width="20" height="20" fill="#1B4F72"/></svg>',
+    '<svg viewBox="0 0 26 26" width="26" height="26"><polygon points="13,2 24,23 2,23" fill="#A9740C"/></svg>',
+    '<svg viewBox="0 0 26 26" width="26" height="26"><rect x="10" y="1" width="6" height="24" fill="#B23A2E"/><rect x="1" y="10" width="24" height="6" fill="#B23A2E"/></svg>'
+  ];
+
+  function V(items){ return items; }
+  function T(v){ return '<table class="vocab-tbl">' + v.map(function(r){
+    return '<tr><td class="w">'+r[0]+'</td><td class="p">'+r[1]+'</td><td>'+r[2]+'</td></tr>';
+  }).join('') + '</table>'; }
+  function EX(pairs){ return pairs.map(function(p){
+    return '<div class="ex"><span class="de">'+p[0]+'</span><span class="bn">'+p[1]+'</span></div>';
+  }).join(''); }
+
+  var weeks = [
+   {
+    title:'সপ্তাহ ১ — ভিত্তি', sub:'উচ্চারণ, sein/haben, নিজের পরিচয়',
+    days:[
+      {t:'বর্ণমালা ও উচ্চারণ (Aussprache)', tag:'grammar',
+       goal:'জার্মান বিশেষ অক্ষর ও শব্দ ঠিকভাবে উচ্চারণ করতে শেখা।',
+       vocabTitle:'বিশেষ ধ্বনি', vocab:T(V([
+         ['ä','এ্যা','Mädchen (মেড্‌শেন) = মেয়ে'],
+         ['ö','ও (ঠোঁট গোল করে)','schön (শ্যোন) = সুন্দর'],
+         ['ü','ঈ (ঠোঁট গোল করে)','müde (ম্যুডে) = ক্লান্ত'],
+         ['ß','স (ss)','groß (গ্রোস) = বড়'],
+         ['ch','হালকা "খ্‌"','ich (ইখ্‌) = আমি'],
+         ['w','ভ (v)','wir (ভির) = আমরা'],
+         ['v','ফ (f)','vier (ফির) = চার'],
+         ['z','ৎস (ts)','zwei (ৎসভাই) = দুই']
+       ])),
+       grammar:'<p class="gnote">নিয়ম মনে রাখুন: <b>w = v</b>, <b>v = f</b>, <b>z = ts</b> এবং <b>ei = আই</b>, <b>ie = ঈ</b> — এই কয়েকটা জানলেই বেশিরভাগ শব্দ পড়তে পারবেন।</p>' + EX([
+         ['zwei (ৎসভাই)','দুই'],
+         ['wie (ভি)','কেমন/কীভাবে'],
+         ['Wein (ভাইন)','ওয়াইন']
+       ]),
+       practice:{task:'উপরের ৮টা শব্দ জোরে জোরে ৩ বার করে বলুন। তারপর নিজের ফোনে রেকর্ড করে শুনুন — উচ্চারণ মিলছে কিনা।',
+         answer:'কোনো "ভুল" উত্তর নেই — এই দিনের লক্ষ্য শুধু কান ও মুখকে অভ্যস্ত করা।'}},
+
+      {t:'শুভেচ্ছা ও মৌলিক phrase', tag:'vocab',
+       goal:'দেখা হলে-বিদায়ের সময় কী বলতে হয় শেখা।',
+       vocab:T(V([
+         ['Hallo','হালো','হ্যালো'],
+         ['Guten Morgen','গুটেন মর্গেন','শুভ সকাল'],
+         ['Guten Tag','গুটেন টাগ','শুভ দুপুর'],
+         ['Guten Abend','গুটেন আবেন্ট','শুভ সন্ধ্যা'],
+         ['Tschüss','চুস','বিদায় (কাছের মানুষ)'],
+         ['Auf Wiedersehen','আউফ ভিডারজেয়েন','বিদায় (আনুষ্ঠানিক)'],
+         ['Wie geht\'s?','ভি গেটস','কেমন আছো?'],
+         ['Danke / Bitte','ডাংকে / বিটে','ধন্যবাদ / স্বাগতম']
+       ])),
+       grammar:'<p class="gnote">জার্মানে দুইভাবে "আপনি" বলা যায়: কাছের মানুষদের <b>du</b>, আনুষ্ঠানিক ক্ষেত্রে <b>Sie</b>। যেমন — বন্ধুকে "Wie geht\'s?", অচেনা/বড়দের "Wie geht es Ihnen?"</p>',
+       practice:{task:'একটা ছোট্ট কথোপকথন লিখুন: সকালে দেখা হয়ে শুভেচ্ছা জানানো, কেমন আছো জিজ্ঞেস করা, আর বিদায় জানানো।',
+         answer:'নমুনা: A: Guten Morgen! Wie geht\'s? B: Danke, gut! Und dir? A: Auch gut, danke. Tschüss! B: Tschüss!'}},
+
+      {t:'সর্বনাম ও verb "sein"', tag:'grammar',
+       goal:'"আমি/তুমি/সে ইত্যাদি" এবং "হওয়া" ক্রিয়া শেখা।',
+       vocabTitle:'সর্বনাম', vocab:T(V([
+         ['ich','ইখ্‌','আমি'],['du','দু','তুমি'],['er / sie / es','এয়া / জি / এস','সে (পুরুষ/স্ত্রী/নিরপেক্ষ)'],
+         ['wir','ভির','আমরা'],['ihr','ইয়া','তোমরা'],['sie / Sie','জি / জি','তারা / আপনি']
+       ])),
+       grammar:'<p class="gnote"><b>sein</b> (হওয়া) — সবচেয়ে গুরুত্বপূর্ণ ক্রিয়া, মুখস্থ করে ফেলুন:</p>' + T(V([
+         ['ich bin','ইখ্‌ বিন','আমি (হই)'],['du bist','দু বিস্ত','তুমি'],['er/sie/es ist','ইস্ত','সে'],
+         ['wir sind','জিন্ড','আমরা'],['ihr seid','জাইট','তোমরা'],['sie/Sie sind','জিন্ড','তারা/আপনি']
+       ])) + EX([['Ich bin müde.','আমি ক্লান্ত।'],['Wir sind hier.','আমরা এখানে।']]),
+       practice:{task:'ফাঁকা পূরণ করুন: "___ bin Student." এবং "Du ___ nett." (nett = ভালো/বন্ধুত্বপূর্ণ)',
+         answer:'Ich bin Student. Du bist nett.'}},
+
+      {t:'verb "haben" ও বাক্যক্রম', tag:'grammar',
+       goal:'"থাকা/আছে" ক্রিয়া এবং জার্মান বাক্যে verb কোথায় বসে তা শেখা।',
+       vocab:T(V([
+         ['ich habe','ইখ্‌ হাবে','আমার আছে'],['du hast','দু হাস্ত','তোমার আছে'],['er/sie/es hat','হাত্‌','তার আছে'],
+         ['wir haben','হাবেন','আমাদের আছে'],['ihr habt','হাবট্‌','তোমাদের আছে'],['sie/Sie haben','হাবেন','তাদের/আপনার আছে']
+       ])),
+       grammar:'<p class="gnote">জার্মান বাক্যে verb সবসময় <b>দ্বিতীয় স্থানে</b> বসে — বাক্য যা দিয়েই শুরু হোক না কেন (V2 rule)।</p>' + EX([
+         ['Ich habe einen Hund.','আমার একটা কুকুর আছে।'],
+         ['Heute habe ich Zeit.','আজ আমার সময় আছে। (Heute প্রথমে, verb তবুও ২য় স্থানে)']
+       ]),
+       practice:{task:'সঠিক ক্রমে সাজান: "Zeit / heute / ich / habe"',
+         answer:'Heute habe ich Zeit. (অথবা: Ich habe heute Zeit.)'}},
+
+      {t:'সংখ্যা ও বয়স', tag:'vocab',
+       goal:'০-১০০ পর্যন্ত সংখ্যা এবং বয়স জিজ্ঞেস/বলা শেখা।',
+       vocab:T(V([
+         ['null, eins, zwei, drei','নুল, আইনস, ৎসভাই, দ্রাই','০, ১, ২, ৩'],
+         ['vier, fünf, sechs','ফির, ফ্যুনফ, জেক্স','৪, ৫, ৬'],
+         ['sieben, acht, neun, zehn','জীবেন, আখট, নয়ন, ৎসেন','৭, ৮, ৯, ১০'],
+         ['zwanzig','ৎসভানৎসিশ্‌','২০'],
+         ['dreißig, vierzig...hundert','দ্রাইসিশ্‌...হুন্ডার্ট','৩০...১০০']
+       ])),
+       grammar:'<p class="gnote">বয়স জিজ্ঞেস করতে: <b>Wie alt bist du?</b> (তোমার বয়স কত?) — উত্তর: <b>Ich bin ... Jahre alt.</b></p>' + EX([['Ich bin fünfundzwanzig Jahre alt.','আমার বয়স পঁচিশ বছর।']]),
+       practice:{task:'নিজের বয়স জার্মানে একটা পূর্ণ বাক্যে লিখুন।',
+         answer:'গঠন: Ich bin [সংখ্যা] Jahre alt. — যেমন Ich bin zwanzig Jahre alt.'}},
+
+      {t:'দেশ ও ভাষা', tag:'vocab',
+       goal:'কোথা থেকে এসেছেন ও কোন ভাষা বলেন তা বলতে শেখা।',
+       vocab:T(V([
+         ['Bangladesch','বাংলাদেশ','বাংলাদেশ'],['Deutschland','ডয়েচলান্ড','জার্মানি'],
+         ['Indien, England, Amerika','ইন্ডিয়েন, এংল্যান্ড, আমেরিকা','ভারত, ইংল্যান্ড, আমেরিকা'],
+         ['Deutsch','ডয়েচ্‌','জার্মান ভাষা'],['Bengali/Bangla','বেংগলি/বাংলা','বাংলা ভাষা'],['Englisch','এংলিশ্‌','ইংরেজি']
+       ])),
+       grammar:EX([
+         ['Woher kommst du?','তুমি কোথা থেকে এসেছো?'],
+         ['Ich komme aus Bangladesch.','আমি বাংলাদেশ থেকে এসেছি।'],
+         ['Ich spreche Bangla und Englisch.','আমি বাংলা ও ইংরেজি বলি।']
+       ]),
+       practice:{task:'৩টা বাক্যে লিখুন: আপনি কোথা থেকে এসেছেন, কোন ভাষা বলেন, আর বর্তমানে কোন ভাষা শিখছেন।',
+         answer:'নমুনা: Ich komme aus Bangladesch. Ich spreche Bangla und Englisch. Ich lerne Deutsch.'}},
+
+      {t:'নিজের পরিচয় + সপ্তাহ ১ রিভিউ', tag:'practice',
+       goal:'এই সপ্তাহের সবকিছু একসাথে জুড়ে সম্পূর্ণ self-introduction তৈরি করা।',
+       grammar:'<p class="gnote">এই সপ্তাহে শেখা সব একসাথে ব্যবহার করবেন: greeting + sein + haben + বয়স + দেশ + ভাষা।</p>',
+       practice:{task:'৬-৮ বাক্যের একটা সম্পূর্ণ self-introduction লিখুন এবং জোরে জোরে বলে অভ্যাস করুন।',
+         answer:'নমুনা: Hallo! Ich bin Rahim. Ich bin fünfundzwanzig Jahre alt. Ich komme aus Bangladesch. Ich spreche Bangla und Englisch. Ich lerne jetzt Deutsch. Ich habe einen Bruder. Wie geht\'s dir?'}}
+    ]
+   },
+   {
+    title:'সপ্তাহ ২ — বিশেষ্য ও বর্তমান কাল', sub:'der/die/das, ক্রিয়া, প্রশ্ন, পরিবার',
+    days:[
+      {t:'বিশেষ্যের লিঙ্গ (der/die/das)', tag:'grammar',
+       goal:'জার্মান বিশেষ্যের তিন লিঙ্গ এবং plural চেনা শুরু করা।',
+       vocab:T(V([
+         ['der Mann → die Männer','মান → ম্যানা','পুরুষ (der = পুংলিঙ্গ)'],
+         ['die Frau → die Frauen','ফ্রাউ → ফ্রাউয়েন','নারী (die = স্ত্রীলিঙ্গ)'],
+         ['das Kind → die Kinder','কিন্ড → কিন্ডা','শিশু (das = নিরপেক্ষ)'],
+         ['der Tisch → die Tische','টিশ্‌ → টিশে','টেবিল']
+       ])),
+       grammar:'<p class="gnote">প্রতিটা জার্মান বিশেষ্যের একটা লিঙ্গ (der/die/das) থাকে — এটা predict করা কঠিন, তাই প্রতিটা নতুন শব্দ <b>article সহ</b> মুখস্থ করুন। খুশির খবর: plural-এ সবসময় <b>die</b> হয়।</p>',
+       practice:{task:'উপরের ৪টা শব্দ article সহ মুখস্থ করুন। তারপর ঘরের ৩টা জিনিসের জার্মান নাম খুঁজে বের করুন (ডিকশনারি/অ্যাপ দিয়ে)।',
+         answer:'যেমন: der Stuhl (চেয়ার), das Buch (বই), die Tür (দরজা)।'}},
+
+      {t:'নিয়মিত ক্রিয়ার বর্তমান কাল', tag:'grammar',
+       goal:'নিয়মিত ক্রিয়া কীভাবে conjugate হয় তা শেখা।',
+       vocab:T(V([
+         ['machen','মাখেন','করা'],['lernen','লেয়া্নেন','শেখা'],['wohnen','ভোনেন','বাস করা'],
+         ['arbeiten','আরবাইটেন','কাজ করা'],['spielen','শপিলেন','খেলা']
+       ])),
+       grammar:'<p class="gnote">প্যাটার্ন: stem + <b>-e, -st, -t, -en, -t, -en</b> (ich/du/er/wir/ihr/sie)।</p>' + EX([
+         ['ich lerne, du lernst, er lernt','আমি শিখি, তুমি শেখো, সে শেখে'],
+         ['wir lernen, ihr lernt, sie lernen','আমরা/তোমরা/তারা শেখে']
+       ]),
+       practice:{task:'"wohnen" ক্রিয়াটা পুরো conjugate করুন (ich...sie/Sie পর্যন্ত ৬টা রূপ)।',
+         answer:'ich wohne, du wohnst, er/sie/es wohnt, wir wohnen, ihr wohnt, sie/Sie wohnen'}},
+
+      {t:'অনিয়মিত ক্রিয়া (vowel change)', tag:'grammar',
+       goal:'du/er রূপে স্বরবর্ণ বদলে যাওয়া কিছু গুরুত্বপূর্ণ ক্রিয়া শেখা।',
+       vocab:T(V([
+         ['fahren → du fährst','ফারেন → ফেয়াস্ত','গাড়ি চালানো/যাওয়া'],
+         ['sprechen → du sprichst','স্প্রেখেন → স্প্রিশ্‌স্ত','কথা বলা'],
+         ['lesen → du liest','লেজেন → লিস্ত','পড়া'],
+         ['essen → du isst','এসেন → ইস্ত','খাওয়া'],
+         ['sehen → du siehst','জেয়েন → জিস্ত','দেখা']
+       ])),
+       grammar:'<p class="gnote">এই ক্রিয়াগুলোতে শুধু <b>du</b> ও <b>er/sie/es</b> রূপে স্বরবর্ণ বদলায়, বাকি সব নিয়মিত।</p>' + EX([['Er spricht Deutsch.','সে জার্মান বলে।'],['Sie liest ein Buch.','সে একটা বই পড়ে।']]),
+       practice:{task:'ফাঁকা পূরণ করুন: "Er ___ (essen) einen Apfel." এবং "Du ___ (fahren) nach Berlin."',
+         answer:'Er isst einen Apfel. Du fährst nach Berlin.'}},
+
+      {t:'প্রশ্নবাচক শব্দ (W-Fragen)', tag:'grammar',
+       goal:'প্রশ্ন তৈরি করা শেখা।',
+       vocab:T(V([
+         ['wer','ভেয়া','কে'],['was','ভাস','কী'],['wo','ভো','কোথায়'],['wann','ভান','কখন'],
+         ['warum','ভারুম','কেন'],['wie','ভি','কীভাবে'],['wie viel','ভি ফিল','কত']
+       ])),
+       grammar:'<p class="gnote">গঠন: প্রশ্নশব্দ + verb + subject।</p>' + EX([['Wo wohnst du?','তুমি কোথায় থাকো?'],['Was machst du?','তুমি কী করছো?']]),
+       practice:{task:'উপরের ৭টা প্রশ্নশব্দ দিয়ে ৫টা প্রশ্ন লিখুন।',
+         answer:'নমুনা: Wer bist du? Was machst du? Wo wohnst du? Wann lernst du Deutsch? Wie viel kostet das?'}},
+
+      {t:'পরিবার (Familie)', tag:'vocab',
+       goal:'পরিবারের সদস্যদের নাম শেখা।',
+       vocab:T(V([
+         ['der Vater / die Mutter','ফাটা / মুটা','বাবা / মা'],
+         ['der Bruder / die Schwester','ব্রুডা / শোয়েস্টা','ভাই / বোন'],
+         ['der Sohn / die Tochter','জোন / টোখটা','ছেলে / মেয়ে'],
+         ['die Eltern','এলটান','বাবা-মা'],
+         ['der Großvater / die Großmutter','গ্রোসফাটা / গ্রোসমুটা','দাদা/নানা / দাদি/নানি']
+       ])),
+       grammar:'<p class="gnote">"আমার" বোঝাতে <b>mein</b> (পুরুষ/নিরপেক্ষ শব্দের আগে) ও <b>meine</b> (স্ত্রীলিঙ্গ শব্দের আগে) ব্যবহার হয় — এটা সপ্তাহ ৪-এ বিস্তারিত শিখবেন। আপাতত: <b>mein Vater</b>, <b>meine Mutter</b>।</p>',
+       practice:{task:'নিজের পরিবারের ৪ জনকে জার্মানে পরিচয় করিয়ে দিন (mein/meine সহ)।',
+         answer:'নমুনা: Das ist mein Vater. Das ist meine Mutter. Das ist mein Bruder. Das ist meine Schwester.'}},
+
+      {t:'সময় ও তারিখ', tag:'vocab',
+       goal:'ঘড়ির সময়, বার ও মাস বলতে শেখা।',
+       vocab:T(V([
+         ['Montag...Sonntag','মোন্টাগ...জনটাগ','সোম...রবিবার'],
+         ['Januar, Februar...','ইয়ানুয়ার, ফেব্রুয়ার...','জানুয়ারি, ফেব্রুয়ারি...'],
+         ['Es ist ... Uhr','এস ইস্ত ... উয়া','এখন ... টা বাজে']
+       ])),
+       grammar:EX([['Wie spät ist es?','এখন কয়টা বাজে?'],['Es ist acht Uhr.','এখন আটটা বাজে।'],['Heute ist Montag.','আজ সোমবার।']]),
+       practice:{task:'আজ কী বার এবং এখন কয়টা বাজে — জার্মানে লিখুন। তারপর সপ্তাহের ৭ দিনের নাম মুখস্থ বলুন।',
+         answer:'গঠন: Heute ist [বার]. Es ist [সংখ্যা] Uhr.'}},
+
+      {t:'দৈনন্দিন রুটিন + separable verbs', tag:'practice',
+       goal:'দিনের রুটিন বর্ণনা করা এবং separable verb-এর নিয়ম শেখা।',
+       vocab:T(V([
+         ['aufstehen','আউফস্টেয়েন','ঘুম থেকে ওঠা'],['frühstücken','ফ্রুস্টুকেন','নাস্তা করা'],
+         ['anfangen','আনফাংগেন','শুরু করা'],['einkaufen','আইনকাউফেন','কেনাকাটা করা']
+       ])),
+       grammar:'<p class="gnote">এই ক্রিয়াগুলোর prefix (auf-, an-, ein-) বাক্যে <b>শেষে চলে যায়</b>।</p>' + EX([['Ich stehe um 7 Uhr auf.','আমি ৭টায় ঘুম থেকে উঠি।'],['Die Schule fängt um 9 Uhr an.','স্কুল ৯টায় শুরু হয়।']]),
+       practice:{task:'সপ্তাহ ২ রিভিউ + নিজের দৈনন্দিন রুটিনের ৫টা বাক্য লিখুন (separable verb ব্যবহার করে)।',
+         answer:'নমুনা: Ich stehe um 6 Uhr auf. Ich frühstücke um 7 Uhr. Ich arbeite. Ich kaufe abends ein. Ich schlafe um 11 Uhr.'}}
+    ]
+   },
+   {
+    title:'সপ্তাহ ৩ — Cases ও Modal Verbs', sub:'Akkusativ, negation, শপিং',
+    days:[
+      {t:'Nominativ ও Akkusativ', tag:'grammar',
+       goal:'জার্মান case system-এর প্রথম পরিচয় — Akkusativ কখন লাগে।',
+       vocab:T(V([
+         ['der → den','দেয়া → দেন','পুংলিঙ্গ Akkusativ-এ বদলায়'],
+         ['ein → einen','আইন → আইনেন','পুংলিঙ্গ (a/an)'],
+         ['die, das','অপরিবর্তিত','স্ত্রী/নিরপেক্ষ একই থাকে']
+       ])),
+       grammar:'<p class="gnote">যে জিনিসের উপর কাজ ঘটে (object) সেটা Akkusativ কেসে যায়। শুধু <b>পুংলিঙ্গ (der)</b> বদলায় — বাকি সব একই থাকে।</p>' + EX([['Ich sehe den Mann.','আমি লোকটাকে দেখি।'],['Ich habe einen Hund.','আমার একটা কুকুর আছে।']]),
+       practice:{task:'ফাঁকা পূরণ করুন: "Ich habe ___ (ein) Bruder." এবং "Ich sehe ___ (der) Tisch."',
+         answer:'Ich habe einen Bruder. Ich sehe den Tisch.'}},
+
+      {t:'Negation: nicht vs kein', tag:'grammar',
+       goal:'"না" বলা শেখা — কখন nicht, কখন kein।',
+       grammar:'<p class="gnote"><b>kein</b> বিশেষ্যকে না বলে (a/an-যুক্ত জিনিস), <b>nicht</b> সবকিছুতে (ক্রিয়া, বিশেষণ)।</p>' + EX([
+         ['Ich habe kein Auto.','আমার কোনো গাড়ি নেই।'],
+         ['Ich bin nicht müde.','আমি ক্লান্ত না।'],
+         ['Ich verstehe nicht.','আমি বুঝছি না।']
+       ]),
+       practice:{task:'এই বাক্যগুলো নেগেটিভ করুন: "Ich habe Zeit." এবং "Er ist glücklich (খুশি)."',
+         answer:'Ich habe keine Zeit. Er ist nicht glücklich.'}},
+
+      {t:'Modal verbs ১ — können, müssen, möchten', tag:'grammar',
+       goal:'"পারা, করতে হবে, চাই" বলতে শেখা।',
+       vocab:T(V([
+         ['ich kann','ইখ্‌ কান','আমি পারি'],['ich muss','ইখ্‌ মুস','আমাকে করতে হবে'],['ich möchte','ইখ্‌ ম্যোখটে','আমি চাই']
+       ])),
+       grammar:'<p class="gnote">Modal verb ২য় স্থানে বসে, আসল ক্রিয়া (infinitive) বাক্যের <b>শেষে</b> যায়।</p>' + EX([
+         ['Ich kann schwimmen.','আমি সাঁতার কাটতে পারি।'],
+         ['Ich muss arbeiten.','আমাকে কাজ করতে হবে।'],
+         ['Ich möchte Kaffee trinken.','আমি কফি খেতে চাই।']
+       ]),
+       practice:{task:'können, müssen, möchten দিয়ে ৩টা নিজের বাক্য বানান।',
+         answer:'নমুনা: Ich kann Deutsch sprechen. Ich muss heute lernen. Ich möchte nach Berlin fahren.'}},
+
+      {t:'Modal verbs ২ + imperative', tag:'grammar',
+       goal:'"পারমিশন, চাওয়া, উচিত" এবং নির্দেশ/অনুরোধ বলা শেখা।',
+       vocab:T(V([
+         ['dürfen','ডুয়া্ফেন','অনুমতি থাকা'],['wollen','ভোলেন','চাওয়া (জোরালো)'],['sollen','জোলেন','উচিত হওয়া']
+       ])),
+       grammar:'<p class="gnote">Imperative (নির্দেশ) — du-রূপ থেকে -st বাদ দিয়ে: <b>Komm!</b> (এসো!), <b>Geh!</b> (যাও!). আনুষ্ঠানিক: verb + Sie — <b>Machen Sie das bitte!</b></p>' + EX([['Darf ich rauchen?','আমি কি ধূমপান করতে পারি (অনুমতি)?'],['Du sollst früh schlafen.','তোমার তাড়াতাড়ি ঘুমানো উচিত।']]),
+       practice:{task:'৩টা নির্দেশ/অনুরোধ বাক্য লিখুন (imperative form-এ) — যেমন কাউকে বসতে, দরজা খুলতে বলা।',
+         answer:'নমুনা: Setz dich! (বসো!) Öffne die Tür! (দরজা খোলো!) Kommen Sie bitte! (আসুন দয়া করে!)'}},
+
+      {t:'খাবার ও শপিং', tag:'vocab',
+       goal:'বাজার/দোকানের শব্দভাণ্ডার ও Akkusativ practice।',
+       vocab:T(V([
+         ['das Brot','ব্রোট','রুটি'],['das Wasser','ভাসা','পানি'],['die Milch','মিল্‌শ','দুধ'],
+         ['der Apfel','আপফেল','আপেল'],['der Käse','কেজে','পনির'],['kaufen','কাউফেন','কেনা']
+       ])),
+       grammar:EX([['Ich kaufe einen Apfel.','আমি একটা আপেল কিনি।'],['Ich brauche Milch und Brot.','আমার দুধ ও রুটি লাগবে।']]),
+       practice:{task:'একটা shopping list বানান — ৫টা জিনিস, Akkusativ article সহ ("Ich kaufe ...")।',
+         answer:'নমুনা: Ich kaufe einen Apfel, ein Brot, eine Milch, einen Käse und Wasser.'}},
+
+      {t:'রেস্তোরাঁ + Akkusativ prepositions', tag:'vocab',
+       goal:'রেস্তোরাঁয় অর্ডার করা এবং কিছু গুরুত্বপূর্ণ preposition শেখা।',
+       vocab:T(V([
+         ['für','ফুয়া','জন্য'],['ohne','ওনে','ছাড়া'],['durch','ডুয়াশ্‌','মধ্য দিয়ে'],['um','উম','প্রায়/চারপাশে']
+       ])),
+       grammar:'<p class="gnote">এই preposition-গুলোর পরে সবসময় Akkusativ কেস আসে।</p>' + EX([
+         ['Ich möchte bestellen.','আমি অর্ডার করতে চাই।'],
+         ['Die Rechnung, bitte.','বিল দিন, দয়া করে।'],
+         ['Ein Kaffee ohne Zucker.','চিনি ছাড়া এক কাপ কফি।']
+       ]),
+       practice:{task:'একটা রেস্তোরাঁর ছোট dialogue লিখুন (৬-৮ লাইন) — অর্ডার দেওয়া থেকে বিল চাওয়া পর্যন্ত।',
+         answer:'নমুনা: Guten Tag! Ich möchte bestellen. Ich hätte gern einen Kaffee ohne Zucker und ein Brot. Danke. Die Rechnung, bitte.'}},
+
+      {t:'বাসা ও ঘর + সপ্তাহ ৩ রিভিউ', tag:'practice',
+       goal:'ঘরের শব্দভাণ্ডার শেখা এবং সপ্তাহ ৩-এর সবকিছু ঝালিয়ে নেওয়া।',
+       vocab:T(V([
+         ['das Haus / die Wohnung','হাউস / ভোনুং','বাড়ি / ফ্ল্যাট'],
+         ['das Zimmer','ৎসিমা','ঘর'],['die Küche','ক্যুশে','রান্নাঘর'],
+         ['das Bad','বাট','বাথরুম'],['das Schlafzimmer','শ্লাফৎসিমা','শোবার ঘর']
+       ])),
+       practice:{task:'নিজের বাসার ৪-৫টা ঘর বর্ণনা করুন, প্রতিটাতে কী কী আছে সেটাসহ (kein/nicht ব্যবহার করে অন্তত একটা বাক্যে)।',
+         answer:'নমুনা: Ich habe eine Küche und ein Schlafzimmer. Ich habe kein Wohnzimmer. Mein Zimmer ist nicht groß.'}}
+    ]
+   },
+   {
+    title:'সপ্তাহ ৪ — Dativ, অতীত কাল ও পরীক্ষা প্রস্তুতি', sub:'Perfekt, আবহাওয়া, mock exam',
+    days:[
+      {t:'Possessive articles (mein, dein...)', tag:'grammar',
+       goal:'"আমার, তোমার, তার" ইত্যাদি সঠিকভাবে ব্যবহার করা।',
+       vocab:T(V([
+         ['mein / meine','মাইন / মাইনে','আমার'],['dein / deine','দাইন / দাইনে','তোমার'],
+         ['sein / seine','জাইন / জাইনে','তার (পুরুষ)'],['ihr / ihre','ইয়া / ইয়ে','তার (স্ত্রী)/তাদের'],
+         ['unser / unsere','উনজা / উনজেরে','আমাদের']
+       ])),
+       grammar:'<p class="gnote">পুংলিঙ্গ/নিরপেক্ষ শব্দের আগে base form (mein), স্ত্রীলিঙ্গ/plural-এর আগে <b>-e</b> যোগ হয় (meine)।</p>' + EX([['Das ist mein Vater.','ইনি আমার বাবা।'],['Das ist meine Schwester.','ইনি আমার বোন।']]),
+       practice:{task:'নিজের পরিবারের ৫ জনকে সঠিক possessive article দিয়ে বর্ণনা করুন।',
+         answer:'নমুনা: Das ist mein Vater. Das ist meine Mutter. Das ist meine Schwester. Das ist mein Bruder. Das ist unser Haus.'}},
+
+      {t:'Dativ case ও preposition', tag:'grammar',
+       goal:'তৃতীয় case (Dativ) এবং এর সাথে ব্যবহৃত preposition শেখা।',
+       vocab:T(V([
+         ['dem (der/das →)','ডেম','পুং/নিরপেক্ষ Dativ'],['der (die →)','ডেয়া','স্ত্রীলিঙ্গ Dativ'],
+         ['mit','মিট','সাথে'],['nach','নাখ','পরে/দিকে'],['bei','বাই','কাছে'],['zu','ৎসু','দিকে/কাছে']
+       ])),
+       grammar:'<p class="gnote">এই preposition-গুলোর পরে সবসময় Dativ কেস — der→dem, die→der।</p>' + EX([
+         ['Ich fahre mit dem Bus.','আমি বাসে করে যাই।'],
+         ['Ich wohne bei meiner Familie.','আমি পরিবারের সাথে থাকি।']
+       ]),
+       practice:{task:'ফাঁকা পূরণ করুন: "Ich fahre mit ___ (der) Bahn." এবং "Ich gehe zu ___ (das) Haus."',
+         answer:'Ich fahre mit der Bahn. Ich gehe zu dem (zum) Haus.'}},
+
+      {t:'Perfekt (অতীত কাল) — haben দিয়ে', tag:'grammar',
+       goal:'"করেছি/খেয়েছি" ইত্যাদি বলতে শেখা — নিয়মিত ক্রিয়া।',
+       grammar:'<p class="gnote">গঠন: <b>haben</b> + Partizip II। নিয়মিত ক্রিয়ায় Partizip II = <b>ge-</b> + stem + <b>-t</b>।</p>' + EX([
+         ['machen → gemacht','Ich habe das gemacht. = আমি এটা করেছি।'],
+         ['lernen → gelernt','Ich habe Deutsch gelernt. = আমি জার্মান শিখেছি।'],
+         ['essen → gegessen','Ich habe Brot gegessen. = আমি রুটি খেয়েছি। (অনিয়মিত)']
+       ]),
+       practice:{task:'বর্তমান কালের ৩টা বাক্যকে Perfekt-এ বদলান: "Ich lerne Deutsch." / "Ich mache das." / "Ich spiele Fußball."',
+         answer:'Ich habe Deutsch gelernt. Ich habe das gemacht. Ich habe Fußball gespielt.'}},
+
+      {t:'Perfekt — sein দিয়ে', tag:'grammar',
+       goal:'গতি/পরিবর্তনবাচক ক্রিয়ার Perfekt শেখা।',
+       vocab:T(V([
+         ['gehen → gegangen','গেয়েন → গেগাংগেন','যাওয়া → গিয়েছি'],
+         ['fahren → gefahren','ফারেন → গেফারেন','যাওয়া(গাড়িতে) → গিয়েছি'],
+         ['kommen → gekommen','কোমেন → গেকোমেন','আসা → এসেছি']
+       ])),
+       grammar:'<p class="gnote">গতি বা অবস্থার পরিবর্তন বোঝানো ক্রিয়াগুলো (gehen, fahren, kommen, aufstehen) <b>sein</b> দিয়ে Perfekt বানায়, haben দিয়ে নয়।</p>' + EX([
+         ['Ich bin nach Hause gegangen.','আমি বাসায় গিয়েছি।'],
+         ['Er ist gestern gekommen.','সে গতকাল এসেছে।']
+       ]),
+       practice:{task:'বদলান: "Ich gehe zur Schule." → Perfekt এবং "Sie fährt nach Berlin." → Perfekt',
+         answer:'Ich bin zur Schule gegangen. Sie ist nach Berlin gefahren.'}},
+
+      {t:'আবহাওয়া, ঋতু ও শখ', tag:'vocab',
+       goal:'আবহাওয়া বর্ণনা করা এবং নিজের শখ নিয়ে কথা বলা।',
+       vocab:T(V([
+         ['Es regnet / Es schneit','এস রেগনেট / শ্নাইট','বৃষ্টি হচ্ছে / বরফ পড়ছে'],
+         ['Es ist kalt / warm / heiß','কাল্ট / ভাম / হাইস','ঠান্ডা / গরম / প্রচণ্ড গরম'],
+         ['der Sommer, Winter...','জোমা, ভিন্টা','গ্রীষ্ম, শীত...'],
+         ['Ich spiele gern Fußball.','ইখ্‌ শপিলে গেয়ান','আমি ফুটবল খেলতে পছন্দ করি']
+       ])),
+       grammar:'<p class="gnote"><b>gern</b> শব্দটা verb-এর পরে বসিয়ে "পছন্দ করা" বোঝানো হয়।</p>',
+       practice:{task:'আজকের আবহাওয়া বর্ণনা করুন এবং আপনার ৩টা শখ সম্পর্কে লিখুন (gern ব্যবহার করে)।',
+         answer:'নমুনা: Heute ist es warm. Ich spiele gern Cricket. Ich lese gern Bücher. Ich höre gern Musik.'}},
+
+      {t:'দিক-নির্দেশনা + পূর্ণ গ্রামার রিভিউ', tag:'grammar',
+       goal:'রাস্তার দিকনির্দেশ বোঝা/দেওয়া এবং ৪ সপ্তাহের গ্রামার একসাথে ঝালিয়ে নেওয়া।',
+       vocab:T(V([
+         ['links / rechts','লিংক্স / রেশট্‌স','বাম / ডান'],['geradeaus','গেরাডেআউস','সোজা'],
+         ['an der Ampel','আন ডেয়া আমপেল','ট্রাফিক লাইটে'],['die Straße','স্ট্রাসে','রাস্তা']
+       ])),
+       grammar:'<p class="gnote">রিভিউ চেকলিস্ট: sein/haben ✓ · Nominativ/Akkusativ/Dativ ✓ · Modal verbs ✓ · Perfekt (haben ও sein দুটোই) ✓ · negation (nicht/kein) ✓</p>' + EX([['Gehen Sie geradeaus, dann links.','সোজা যান, তারপর বামে।']]),
+       practice:{task:'নিজের বাসায় যাওয়ার রাস্তা জার্মানে বর্ণনা করুন (৪-৫ বাক্য, দিক-নির্দেশনা শব্দ ব্যবহার করে)।',
+         answer:'নমুনা: Gehen Sie geradeaus. An der Ampel gehen Sie rechts. Mein Haus ist links, neben der Schule.'}},
+
+      {t:'Mock exam ও চূড়ান্ত রিভিউ', tag:'practice',
+       goal:'Goethe A1 পরীক্ষার ৪টা অংশ অনুশীলন এবং নিজের দুর্বলতা চিহ্নিত করা।',
+       grammar:'<p class="gnote">Goethe A1 পরীক্ষার ৪টা অংশ:</p>' + EX([
+         ['Hören','listening — কোনো অডিও/ভিডিও শুনে মূল কথা বোঝা'],
+         ['Lesen','reading — ছোট টেক্সট পড়ে প্রশ্নের উত্তর'],
+         ['Schreiben','writing — একটা ছোট ফর্ম পূরণ ও চিঠি লেখা'],
+         ['Sprechen','speaking — নিজের পরিচয় ও প্রশ্ন-উত্তর']
+       ]),
+       practice:{task:'নিজেকে টেস্ট করুন: (১) নিজের পরিচয় ১ মিনিট বলুন ও রেকর্ড করুন, (২) একটা ৫-বাক্যের চিঠি লিখুন কোনো বন্ধুকে, (৩) সপ্তাহ ১-৪ এর vocab থেকে ২০টা শব্দ যেগুলো এখনো মনে নেই সেগুলো আলাদা করে আরেকবার practice করুন।',
+         answer:'এই দিনে কোনো "একক উত্তর" নেই — লক্ষ্য হলো নিজের দুর্বল জায়গা খুঁজে বের করে সেগুলো আরেকবার ঝালিয়ে নেওয়া। যদি এই ৪টা কাজ comfortable মনে হয়, আপনি A1 সম্পূর্ণ করেছেন।'}}
+    ]
+   }
+  ];
+
+  var root = document.getElementById('root');
+  var weeksEl = document.getElementById('weeks');
+  var STORE_KEY = 'german-a1-progress-v2';
+  var state = {};
+
+  function tagLabel(t){
+    if(t==='vocab') return 'ভোকাব';
+    if(t==='grammar') return 'গ্রামার';
+    return 'প্র্যাকটিস';
+  }
+
+  function render(){
+    weeksEl.innerHTML = '';
+    var totalDone = 0, totalDays = 0;
+    weeks.forEach(function(w, wi){
+      totalDays += w.days.length;
+      var wrap = document.createElement('div');
+      wrap.className = 'week' + (state['open-'+wi] ? ' open' : '');
+
+      var doneCount = 0;
+      w.days.forEach(function(_, di){ if(state['done-'+wi+'-'+di]) doneCount++; });
+      totalDone += doneCount;
+
+      var head = document.createElement('div');
+      head.className = 'week-head';
+      head.innerHTML =
+        '<span class="badge">'+shapes[wi]+'</span>' +
+        '<div><p class="week-title">'+w.title+'</p><p class="week-sub">'+w.sub+'</p></div>' +
+        '<span class="week-progress">'+doneCount+'/'+w.days.length+'</span>' +
+        '<svg class="chevron" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"></polyline></svg>';
+      head.addEventListener('click', function(){
+        state['open-'+wi] = !state['open-'+wi];
+        save(); render();
+      });
+      wrap.appendChild(head);
+
+      var daysWrap = document.createElement('div');
+      daysWrap.className = 'days';
+      w.days.forEach(function(d, di){
+        var dayNum = wi*7 + di + 1;
+        var dRow = document.createElement('div');
+        dRow.className = 'day' + (state['done-'+wi+'-'+di] ? ' done' : '') + (state['exp-'+wi+'-'+di] ? ' expanded' : '');
+
+        var dHead = document.createElement('div');
+        dHead.className = 'day-head';
+        var cb = document.createElement('input');
+        cb.type = 'checkbox';
+        cb.checked = !!state['done-'+wi+'-'+di];
+        cb.addEventListener('click', function(e){ e.stopPropagation(); });
+        cb.addEventListener('change', function(){
+          state['done-'+wi+'-'+di] = cb.checked;
+          save(); render();
+        });
+        var lbl = document.createElement('span');
+        lbl.className = 'day-label';
+        lbl.innerHTML = '<span class="tag '+d.tag+'">'+tagLabel(d.tag)+'</span><span class="day-title">দিন '+dayNum+' — '+d.t+'</span>';
+        dHead.appendChild(cb);
+        dHead.appendChild(lbl);
+        dHead.innerHTML += '<svg class="day-chevron" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"></polyline></svg>';
+        dHead.addEventListener('click', function(ev){
+          if(ev.target === cb) return;
+          state['exp-'+wi+'-'+di] = !state['exp-'+wi+'-'+di];
+          save(); render();
+        });
+        dRow.appendChild(dHead);
+
+        var lesson = document.createElement('div');
+        lesson.className = 'lesson';
+        var html = '<p class="goal">'+d.goal+'</p>';
+        if(d.vocab){
+          html += '<p class="block-title vocab-t">'+(d.vocabTitle||'শব্দভাণ্ডার')+'</p>' + d.vocab;
+        }
+        if(d.grammar){
+          html += '<p class="block-title grammar-t">গ্রামার ও উদাহরণ</p>' + d.grammar;
+        }
+        if(d.practice){
+          var pid = 'ans-'+wi+'-'+di;
+          html += '<p class="block-title practice-t">প্র্যাকটিস</p><p class="task">'+d.practice.task+'</p>' +
+            '<button class="ans-btn" data-target="'+pid+'">উত্তর/নমুনা দেখুন</button>' +
+            '<div class="ans" id="'+pid+'">'+d.practice.answer+'</div>';
+        }
+        lesson.innerHTML = html;
+        dRow.appendChild(lesson);
+        daysWrap.appendChild(dRow);
+      });
+      wrap.appendChild(daysWrap);
+      weeksEl.appendChild(wrap);
+    });
+
+    document.getElementById('stat-num').textContent = totalDone + '/' + totalDays;
+    var pct = Math.round((totalDone/totalDays)*100);
+    document.getElementById('stat-pct').textContent = pct + '%';
+    document.getElementById('track-fill').style.width = pct + '%';
+
+    Array.prototype.forEach.call(document.querySelectorAll('.ans-btn'), function(btn){
+      btn.addEventListener('click', function(e){
+        e.stopPropagation();
+        var t = document.getElementById(btn.dataset.target);
+        t.classList.toggle('show');
+      });
+    });
+  }
+
+  function save(){
+    try{ window.storage.set(STORE_KEY, JSON.stringify(state), false); }catch(e){}
+  }
+
+  function load(){
+    window.storage.get(STORE_KEY, false).then(function(res){
+      if(res && res.value){ try{ state = JSON.parse(res.value); }catch(e){ state = {}; } }
+      if(Object.keys(state).length === 0) state['open-0'] = true;
+      render();
+    }).catch(function(){
+      state = {'open-0': true};
+      render();
+    });
+  }
+
+  document.getElementById('reset-btn').addEventListener('click', function(){
+    state = {'open-0': true};
+    save(); render();
+  });
+
+  load();
+})();
+</script>
